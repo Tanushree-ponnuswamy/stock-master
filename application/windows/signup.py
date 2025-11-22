@@ -8,14 +8,13 @@ class SignupScreen:
         self.root.title("Sign Up - Stock Master")
         self.API_URL = "http://127.0.0.1:8000"
         
-        # Colors
         self.color_bg_right = "white"
         self.color_primary = "#000000" 
         self.color_text_head = "#111827"
         self.color_text_sub = "#6B7280"
         self.color_input_bg = "#F9FAFB"
         self.color_border = "#E5E7EB"
-        self.color_success = "#10B981" # Green for success tick
+        self.color_success = "#10B981"
         
         self.setup_window()
         self.setup_ui()
@@ -39,7 +38,6 @@ class SignupScreen:
         main_container.grid_columnconfigure(1, weight=1, uniform="half_split")
         main_container.grid_rowconfigure(0, weight=1)
 
-        # --- LEFT SIDE ---
         self.canvas_left = tk.Canvas(main_container, highlightthickness=0)
         self.canvas_left.grid(row=0, column=0, sticky="nsew")
         self.draw_gradient(self.canvas_left, "#ff9966", "#ff5e62")
@@ -49,17 +47,15 @@ class SignupScreen:
         self.canvas_left.create_text(50, screen_h - 270, text="Join the Ecosystem", font=("Helvetica", 14), fill="#FFF1F2", anchor="w")
         self.canvas_left.create_text(50, screen_h - 180, text="Start your journey\ntowards organized\ngrowth.", font=("Helvetica", 28, "bold"), fill="white", anchor="w", justify="left")
 
-        # --- RIGHT SIDE (We make this an instance variable to access it later) ---
         self.frame_right = tk.Frame(main_container, bg=self.color_bg_right)
         self.frame_right.grid(row=0, column=1, sticky="nsew")
         
-        self.show_signup_form() # Initially show the form
+        self.show_signup_form()
 
         self.canvas_left.bind("<Configure>", lambda e: self.draw_gradient(self.canvas_left, "#ff9966", "#ff5e62"))
 
     def show_signup_form(self):
         """Helper to draw the form fields"""
-        # Clear right frame first
         for widget in self.frame_right.winfo_children():
             widget.destroy()
 
@@ -98,20 +94,16 @@ class SignupScreen:
 
     def show_success_screen(self):
         """Replaces the form with the Success Message"""
-        # Clear right frame
         for widget in self.frame_right.winfo_children():
             widget.destroy()
 
         success_card = tk.Frame(self.frame_right, bg=self.color_bg_right)
         success_card.place(relx=0.5, rely=0.5, anchor="center")
 
-        # Draw a Tick Mark using Canvas
         tick_canvas = tk.Canvas(success_card, width=100, height=100, bg=self.color_bg_right, highlightthickness=0)
         tick_canvas.pack(pady=(0, 20))
         
-        # Draw Green Circle
         tick_canvas.create_oval(5, 5, 95, 95, outline=self.color_success, width=4)
-        # Draw Tick
         tick_canvas.create_line(25, 50, 45, 70, fill=self.color_success, width=5, capstyle="round")
         tick_canvas.create_line(45, 70, 75, 30, fill=self.color_success, width=5, capstyle="round")
 
@@ -143,7 +135,6 @@ class SignupScreen:
             response = requests.post(f"{self.API_URL}/signup", json=payload)
             
             if response.status_code == 200:
-                # --- CHANGED: Call show_success_screen instead of popup ---
                 self.show_success_screen()
             else:
                 error_detail = response.json().get("detail", "Unknown Error")

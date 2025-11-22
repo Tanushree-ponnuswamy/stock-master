@@ -29,12 +29,10 @@ class ProfileView:
         self.content_frame = tk.Frame(self.frame, bg="#f3f4f6")
         self.content_frame.pack(fill="both", expand=True)
         
-        # Left Column
         left_frame = tk.Frame(self.content_frame, bg="#f3f4f6")
         left_frame.pack(side="left", fill="both", expand=True, padx=(0, 10))
         self.create_info_card(left_frame)
         
-        # Right Column
         right_frame = tk.Frame(self.content_frame, bg="#f3f4f6")
         right_frame.pack(side="left", fill="both", expand=True, padx=(10, 0))
         self.create_security_card(right_frame)
@@ -80,7 +78,6 @@ class ProfileView:
         new = self.entry_new_pass.get()
         conf = self.entry_conf_pass.get()
         
-        # Validation
         if not curr or not new or not conf:
             messagebox.showwarning("Missing Input", "Please fill all password fields.")
             return
@@ -111,41 +108,31 @@ class ProfileView:
             messagebox.showerror("Error", "Server Connection Failed")
 
     def show_success_screen(self):
-        # Clear the entire profile frame content
         for widget in self.frame.winfo_children():
             widget.destroy()
 
         success_frame = tk.Frame(self.frame, bg="#f3f4f6")
         success_frame.place(relx=0.5, rely=0.5, anchor="center")
 
-        # Draw Tick Mark Canvas
         tick_canvas = tk.Canvas(success_frame, width=120, height=120, bg="#f3f4f6", highlightthickness=0)
         tick_canvas.pack(pady=(0, 20))
         
         color_success = "#10B981"
-        # Draw Circle
         tick_canvas.create_oval(10, 10, 110, 110, outline=color_success, width=5)
-        # Draw Tick
         tick_canvas.create_line(30, 60, 55, 85, fill=color_success, width=6, capstyle="round")
         tick_canvas.create_line(55, 85, 90, 40, fill=color_success, width=6, capstyle="round")
 
         tk.Label(success_frame, text="Password Changed Successfully!", font=("Helvetica", 22, "bold"), fg="#111827", bg="#f3f4f6").pack()
         tk.Label(success_frame, text="Redirecting to Login in 5 seconds...", font=("Helvetica", 12), fg="#6b7280", bg="#f3f4f6").pack(pady=10)
 
-        # Schedule Redirect
         self.frame.after(5000, self.logout_to_login)
 
     def logout_to_login(self):
-        # Close dashboard and open login (using dashboard's method usually, or importing)
         from windows.login import LoginScreen
-        # We need the root window. Since self.parent is content_frame's parent (dashboard frame), 
-        # we usually need self.dashboard.root or similar. 
-        # Assuming self.dashboard.root is available:
+
         root = self.dashboard.root
-        # Clear root
         for widget in root.winfo_children():
             widget.destroy()
-        # Reset geometry (optional, login handles it)
         LoginScreen(root)
 
     def create_display_field(self, parent, label, value):

@@ -36,7 +36,6 @@ class LoginScreen:
         main_container.grid_columnconfigure(1, weight=1, uniform="half_split")
         main_container.grid_rowconfigure(0, weight=1)
 
-        # --- LEFT SIDE ---
         self.canvas_left = tk.Canvas(main_container, highlightthickness=0)
         self.canvas_left.grid(row=0, column=0, sticky="nsew")
         self.draw_gradient(self.canvas_left, "#ff9966", "#ff5e62")
@@ -46,7 +45,6 @@ class LoginScreen:
         self.canvas_left.create_text(50, screen_h - 270, text="Seamless Management", font=("Helvetica", 14), fill="#FFF1F2", anchor="w")
         self.canvas_left.create_text(50, screen_h - 180, text="Empower your business\nwith intelligent stock\ncontrol.", font=("Helvetica", 28, "bold"), fill="white", anchor="w", justify="left")
 
-        # --- RIGHT SIDE ---
         frame_right = tk.Frame(main_container, bg=self.color_bg_right)
         frame_right.grid(row=0, column=1, sticky="nsew")
         
@@ -68,7 +66,6 @@ class LoginScreen:
         btn_forgot = tk.Button(login_card, text="Forgot Password?", font=("Helvetica", 9), fg=self.color_text_sub, bg=self.color_bg_right, activebackground=self.color_bg_right, activeforeground=self.color_primary, cursor="hand2", relief="flat", borderwidth=0, command=self.open_forgot)
         btn_forgot.pack(anchor="e", pady=(0, 20))
 
-        # --- UPDATED LOGIN BUTTON ---
         btn_login = tk.Button(login_card, text="Login to Dashboard", font=("Helvetica", 11, "bold"), bg=self.color_primary, fg="white", activebackground="#333333", activeforeground="white", cursor="hand2", relief="flat", borderwidth=0, 
                               command=self.handle_login) # Linked to logic
         btn_login.pack(fill="x", ipady=10)

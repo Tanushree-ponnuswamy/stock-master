@@ -16,7 +16,6 @@ class StockView:
         self.setup_header()
         self.setup_kpi_cards()
         self.setup_charts_section()
-        # self.setup_stock_list() <--- REMOVED AS REQUESTED
         
         self.load_stock_data()
 
@@ -26,14 +25,12 @@ class StockView:
         
         tk.Label(header_frame, text="Stock Analytics", font=("Helvetica", 20, "bold"), fg="#111827", bg="#f3f4f6").pack(side="left")
         
-        # 1. Remove Stock Button (Far Right)
         btn_remove = tk.Button(header_frame, text="⚠ Remove Stock / Write-off", font=("Helvetica", 10, "bold"), 
                                bg="#ef4444", fg="white", activebackground="#b91c1c", activeforeground="white",
                                relief="flat", cursor="hand2", padx=15, pady=8,
                                command=self.open_remove_stock_modal)
         btn_remove.pack(side="right", padx=(10, 0))
 
-        # 2. Removal Details Button (Left of Remove Stock)
         btn_details = tk.Button(header_frame, text="📋 Removal Details", font=("Helvetica", 10, "bold"), 
                                 bg="#374151", fg="white", activebackground="#1f2937", activeforeground="white",
                                 relief="flat", cursor="hand2", padx=15, pady=8,
@@ -96,7 +93,6 @@ class StockView:
 
         if not self.all_products: return
 
-        # Bar Chart
         cat_counts = {}
         for p in self.all_products:
             cat = p['category']
@@ -111,7 +107,6 @@ class StockView:
         canvas1 = FigureCanvasTkAgg(fig1, self.frame_chart_left)
         canvas1.get_tk_widget().pack(fill="both", expand=True)
 
-        # Pie Chart
         low = sum(1 for p in self.all_products if 0 < p['stock'] < 10)
         out = sum(1 for p in self.all_products if p['stock'] == 0)
         ok = len(self.all_products) - low - out
@@ -134,7 +129,6 @@ class StockView:
             canvas2 = FigureCanvasTkAgg(fig2, self.frame_chart_right)
             canvas2.get_tk_widget().pack(fill="both", expand=True)
 
-    # --- REMOVAL LOG MODAL (NEW) ---
     def open_removal_log(self):
         log_win = tk.Toplevel(self.frame)
         log_win.title("Stock Removal / Write-off History")
@@ -143,7 +137,6 @@ class StockView:
 
         tk.Label(log_win, text="Stock Write-off Log", font=("Helvetica", 16, "bold"), fg="#111827", bg="white").pack(pady=15)
 
-        # Table
         table_frame = tk.Frame(log_win, bg="white", padx=20, pady=10)
         table_frame.pack(fill="both", expand=True)
 
@@ -159,7 +152,6 @@ class StockView:
         
         tree.pack(fill="both", expand=True)
 
-        # Fetch Data
         try:
             res = requests.get(f"{self.API_URL}/stock-moves")
             if res.status_code == 200:
@@ -179,7 +171,6 @@ class StockView:
             messagebox.showerror("Error", "Could not fetch log")
 
 
-    # --- REMOVE STOCK FORM ---
     def open_remove_stock_modal(self):
         self.modal = tk.Toplevel(self.frame)
         self.modal.title("Remove Stock / Write-off")

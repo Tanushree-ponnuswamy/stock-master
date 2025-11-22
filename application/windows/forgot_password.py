@@ -8,8 +8,8 @@ class ForgotPasswordScreen:
         self.root.title("Reset Password - Stock Master")
         self.API_URL = "http://127.0.0.1:8000"
         
-        self.email_storage = "" # To remember email across steps
-        self.otp_storage = ""   # To remember OTP across steps
+        self.email_storage = ""
+        self.otp_storage = ""
         
         self.setup_window()
         self.setup_ui()
@@ -23,7 +23,6 @@ class ForgotPasswordScreen:
         self.root.resizable(False, False)
 
     def setup_ui(self):
-        # Clear main window
         for widget in self.root.winfo_children():
             widget.destroy()
 
@@ -33,7 +32,6 @@ class ForgotPasswordScreen:
         main_container.grid_columnconfigure(1, weight=1, uniform="half_split")
         main_container.grid_rowconfigure(0, weight=1)
 
-        # --- LEFT SIDE (Static) ---
         self.canvas_left = tk.Canvas(main_container, highlightthickness=0)
         self.canvas_left.grid(row=0, column=0, sticky="nsew")
         self.draw_gradient(self.canvas_left, "#ff9966", "#ff5e62")
@@ -43,14 +41,11 @@ class ForgotPasswordScreen:
         self.canvas_left.create_text(50, screen_h - 270, text="Security First", font=("Helvetica", 14), fill="#FFF1F2", anchor="w")
         self.canvas_left.create_text(50, screen_h - 180, text="Recover access to\nyour dashboard\nsecurely.", font=("Helvetica", 28, "bold"), fill="white", anchor="w", justify="left")
 
-        # --- RIGHT SIDE (Dynamic) ---
         self.frame_right = tk.Frame(main_container, bg="white")
         self.frame_right.grid(row=0, column=1, sticky="nsew")
         
-        # Start with Step 1: Email Input
         self.show_step_1_email()
 
-    # --- STEP 1: EMAIL INPUT ---
     def show_step_1_email(self):
         self.clear_right_frame()
         
@@ -71,7 +66,6 @@ class ForgotPasswordScreen:
         
         self.add_back_button(card)
 
-    # --- STEP 2: OTP INPUT ---
     def show_step_2_otp(self):
         self.clear_right_frame()
         
@@ -91,7 +85,6 @@ class ForgotPasswordScreen:
         btn_resend = tk.Button(card, text="Resend Code", font=("Helvetica", 9), bg="white", fg="#2563eb", relief="flat", cursor="hand2", command=self.action_get_otp)
         btn_resend.pack(pady=10)
 
-    # --- STEP 3: NEW PASSWORD ---
     def show_step_3_reset(self):
         self.clear_right_frame()
         
@@ -113,7 +106,6 @@ class ForgotPasswordScreen:
                               command=self.action_final_reset)
         btn_reset.pack(fill="x", ipady=10)
 
-    # --- ACTIONS ---
     def action_get_otp(self):
         email = self.email_storage if self.email_storage else self.entry_email.get().strip()
         if not email:
@@ -138,7 +130,6 @@ class ForgotPasswordScreen:
             return
 
         try:
-            # Check OTP with server
             payload = {"email": self.email_storage, "otp": otp}
             res = requests.post(f"{self.API_URL}/forgot-password/verify-otp", json=payload)
             
@@ -185,9 +176,8 @@ class ForgotPasswordScreen:
         tk.Label(card, text="Password Reset Successful!", font=("Helvetica", 18, "bold"), bg="white", fg="#111827").pack()
         tk.Label(card, text="Redirecting to login...", font=("Helvetica", 10), bg="white", fg="#6b7280").pack(pady=10)
         
-        self.root.after(3000, self.open_login) # 3 seconds is usually enough
+        self.root.after(3000, self.open_login) 
 
-    # --- HELPERS ---
     def clear_right_frame(self):
         for widget in self.frame_right.winfo_children():
             widget.destroy()

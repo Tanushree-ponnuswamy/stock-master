@@ -4,7 +4,6 @@ import requests
 from datetime import datetime
 import os
 
-# Try importing reportlab for PDF generation
 try:
     from reportlab.pdfgen import canvas
     from reportlab.lib.pagesizes import letter
@@ -133,16 +132,13 @@ class OperationsView:
         self.rec_tree.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
         
-        # Bind Click Event
         self.rec_tree.bind("<<TreeviewSelect>>", self.on_receipt_select)
 
-        # --- RIGHT PANE (Details) ---
         self.right_frame = tk.Frame(paned, bg="white", width=500, padx=30, pady=30)
         paned.add(self.right_frame)
         
         tk.Label(self.right_frame, text="Transaction Details", font=("Helvetica", 16, "bold"), bg="white", fg="#1f2937").pack(anchor="w", pady=(0, 20))
         
-        # Labels to show details (Dynamic)
         self.lbl_r_id = tk.Label(self.right_frame, text="Select a transaction...", font=("Helvetica", 10), bg="white", fg="#6b7280", anchor="w")
         self.lbl_r_id.pack(fill="x", pady=2)
         
@@ -158,21 +154,17 @@ class OperationsView:
         self.lbl_r_total = tk.Label(self.right_frame, text="", font=("Helvetica", 18, "bold"), bg="white", fg="#166534", anchor="w")
         self.lbl_r_total.pack(fill="x", pady=(20, 30))
         
-        # Buttons Container
         self.btn_frame = tk.Frame(self.right_frame, bg="white")
         self.btn_frame.pack(fill="x")
         
-        # View Button
         self.btn_view = tk.Button(self.btn_frame, text="👁 View Receipt", font=("Helvetica", 11), bg="#f3f4f6", fg="#1f2937", relief="flat", padx=20, pady=10, state="disabled",
                                   command=self.view_receipt_popup)
         self.btn_view.pack(side="left", padx=(0, 10))
         
-        # Download Button
         self.btn_dl = tk.Button(self.btn_frame, text="⬇ Download PDF", font=("Helvetica", 11, "bold"), bg="black", fg="white", relief="flat", padx=20, pady=10, state="disabled",
                                 command=self.download_receipt_pdf)
         self.btn_dl.pack(side="left")
 
-        # Load Data into List
         self.load_receipts_list()
 
     def load_receipts_list(self):
@@ -295,26 +287,15 @@ class OperationsView:
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to save PDF: {e}")
 
-    # --- HELPER METHODS from previous steps (Transaction Form) ---
     def open_transaction_modal(self, default_type="IN"):
-        # (Copy the exact content of open_transaction_modal from Step 16 here to make this file self-contained)
-        # For brevity in this response, assume the previous transaction logic exists here.
-        # IMPORTANT: Ensure the transaction methods (add_item_to_list, submit_transaction, etc.) are included in this file.
+       
         pass
     
-    # ... (Include fetch_product_details, calc_line_total, update_location_label, submit_transaction, add_item_to_list, set_entry here) ...
-    # I will re-include them below for completeness so you can copy-paste safely.
     def update_location_label(self, event):
         val = self.combo_type.get(); self.lbl_location.config(text="From:" if val=="IN" else "To:")
     
-    # (Include other helper methods if you want the + Add buttons to work in this file too)
-    # Since the focus is Receipts, make sure to merge the code from Step 16 if you overwrite this file completely.
-    # To avoid breaking the + buttons, I will re-add the transaction modal code briefly below.
-    
     def open_history_modal(self, move_type):
-        # (Code from Step 16)
         pass
     
-    # Re-adding basic Transaction Modal methods to ensure no errors:
     def open_transaction_modal(self, default_type="IN"):
          messagebox.showinfo("Info", "Please check Step 16 code for the full transaction modal implementation.")

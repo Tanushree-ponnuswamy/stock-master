@@ -7,7 +7,6 @@ class ProductsView:
         self.parent = parent
         self.API_URL = "http://127.0.0.1:8000"
         
-        # Store all data here to filter locally
         self.all_products = [] 
         
         self.frame = tk.Frame(parent, bg="#f3f4f6")
@@ -35,20 +34,17 @@ class ProductsView:
         bar_frame = tk.Frame(self.frame, bg="white", padx=15, pady=15)
         bar_frame.pack(fill="x", pady=(0, 20))
         
-        # 1. Search Input
         tk.Label(bar_frame, text="Search:", font=("Helvetica", 10, "bold"), bg="white", fg="#374151").pack(side="left", padx=(0, 5))
         self.entry_search = tk.Entry(bar_frame, font=("Helvetica", 10), width=30, relief="solid", bd=1)
         self.entry_search.pack(side="left", ipady=4)
         self.entry_search.bind("<Return>", lambda e: self.perform_search())
 
-        # 2. Category Filter
         tk.Label(bar_frame, text="Category:", font=("Helvetica", 10, "bold"), bg="white", fg="#374151").pack(side="left", padx=(20, 5))
         self.filter_category = ttk.Combobox(bar_frame, font=("Helvetica", 10), width=20, state="readonly")
         self.filter_category.set("All Categories")
         self.filter_category.pack(side="left", ipady=4)
         self.filter_category.bind("<<ComboboxSelected>>", lambda e: self.perform_search())
 
-        # 3. Action Buttons
         btn_search = tk.Button(bar_frame, text="Apply Filters", font=("Helvetica", 9, "bold"), 
                                bg="#f3f4f6", fg="#374151", relief="flat", cursor="hand2", padx=10,
                                command=self.perform_search)
@@ -66,7 +62,6 @@ class ProductsView:
         scrollbar = ttk.Scrollbar(table_frame)
         scrollbar.pack(side="right", fill="y")
         
-        # Added 'price' to columns
         columns = ("id", "name", "sku", "category", "uom", "price", "stock", "action")
         self.tree = ttk.Treeview(table_frame, columns=columns, show="headings", yscrollcommand=scrollbar.set, selectmode="browse")
         
@@ -166,7 +161,6 @@ class ProductsView:
         form_frame = tk.Frame(self.modal, bg="white", padx=30)
         form_frame.pack(fill="both", expand=True)
 
-        # Form Fields
         tk.Label(form_frame, text="Product Name *", font=("Helvetica", 10, "bold"), bg="white", fg="#374151").pack(anchor="w", pady=(5, 2))
         self.entry_name = tk.Entry(form_frame, font=("Helvetica", 10), relief="solid", bd=1)
         self.entry_name.pack(fill="x", ipady=4, pady=(0, 10))

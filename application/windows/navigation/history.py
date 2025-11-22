@@ -9,7 +9,6 @@ class HistoryView:
         self.API_URL = "http://127.0.0.1:8000"
         self.all_moves = []
         
-        # List to hold items before submitting
         self.transaction_items = [] 
 
         self.frame = tk.Frame(parent, bg="#f3f4f6")
@@ -23,10 +22,8 @@ class HistoryView:
         header_frame = tk.Frame(self.frame, bg="#f3f4f6")
         header_frame.pack(fill="x", pady=(0, 20))
         
-        # Title
         tk.Label(header_frame, text="Movement History", font=("Helvetica", 20, "bold"), fg="#111827", bg="#f3f4f6").pack(side="left")
         
-        # --- THE ADD BUTTON ---
         btn_add = tk.Button(header_frame, text="+ Record Movement", font=("Helvetica", 10, "bold"), 
                             bg="black", fg="white", relief="flat", cursor="hand2", padx=15, pady=8,
                             command=self.open_add_move_window)
@@ -62,12 +59,10 @@ class HistoryView:
 
         self.tree.pack(fill="both", expand=True)
         
-        # Configure Colors
         self.tree.tag_configure("IN", foreground="#166534")  # Green
         self.tree.tag_configure("OUT", foreground="#991b1b") # Red
 
     def load_history(self):
-        # Clear table
         for item in self.tree.get_children():
             self.tree.delete(item)
             
@@ -77,7 +72,6 @@ class HistoryView:
                 for m in response.json():
                     tag = "IN" if m['move_type'] == "IN" else "OUT"
                     
-                    # Format Date
                     clean_date = m['created_at'][:16].replace("T", " ")
                     
                     self.tree.insert("", "end", values=(
@@ -92,7 +86,6 @@ class HistoryView:
         except requests.exceptions.ConnectionError:
             print("Connection Error")
 
-    # --- TRANSACTION MODAL ---
     def open_add_move_window(self):
         self.modal = tk.Toplevel(self.frame)
         self.modal.title("Record Stock Movement")
@@ -100,10 +93,8 @@ class HistoryView:
         self.modal.configure(bg="white")
         self.modal.grab_set()
         
-        # Reset transaction list
         self.transaction_items = []
 
-        # 1. Header (Type & Location)
         top_frame = tk.Frame(self.modal, bg="#f9fafb", padx=20, pady=20)
         top_frame.pack(fill="x")
 
@@ -118,42 +109,34 @@ class HistoryView:
         self.entry_location = tk.Entry(top_frame, width=30, relief="solid", bd=1)
         self.entry_location.grid(row=0, column=3, padx=5)
 
-        # 2. Item Entry Area
         entry_frame = tk.Frame(self.modal, bg="white", padx=20, pady=10)
         entry_frame.pack(fill="x")
 
-        # SKU Input
         tk.Label(entry_frame, text="SKU (Hit Enter):", bg="white", font=("Helvetica", 9)).grid(row=0, column=0, sticky="w")
         self.entry_sku = tk.Entry(entry_frame, width=15, bg="#eff6ff", relief="solid", bd=1)
         self.entry_sku.grid(row=1, column=0, padx=5, pady=5)
         self.entry_sku.bind("<Return>", self.fetch_product_details)
 
-        # Auto-Filled Name
         tk.Label(entry_frame, text="Product Name:", bg="white", font=("Helvetica", 9)).grid(row=0, column=1, sticky="w")
         self.lbl_prod_name = tk.Entry(entry_frame, width=25, bg="#f3f4f6", state="disabled", disabledforeground="black")
         self.lbl_prod_name.grid(row=1, column=1, padx=5)
 
-        # Auto-Filled Price
         tk.Label(entry_frame, text="Price:", bg="white", font=("Helvetica", 9)).grid(row=0, column=2, sticky="w")
         self.lbl_prod_price = tk.Entry(entry_frame, width=10, bg="#f3f4f6", state="disabled", disabledforeground="black")
         self.lbl_prod_price.grid(row=1, column=2, padx=5)
 
-        # Qty Input
         tk.Label(entry_frame, text="Quantity:", bg="white", font=("Helvetica", 9)).grid(row=0, column=3, sticky="w")
         self.entry_qty = tk.Entry(entry_frame, width=10, relief="solid", bd=1)
         self.entry_qty.grid(row=1, column=3, padx=5)
         self.entry_qty.bind("<KeyRelease>", self.calc_line_total)
 
-        # Calculated Total
         tk.Label(entry_frame, text="Total:", bg="white", font=("Helvetica", 9)).grid(row=0, column=4, sticky="w")
         self.lbl_line_total = tk.Entry(entry_frame, width=12, bg="#f3f4f6", state="disabled", disabledforeground="black")
         self.lbl_line_total.grid(row=1, column=4, padx=5)
 
-        # Add Button
         btn_add_line = tk.Button(entry_frame, text="Add to List", bg="black", fg="white", command=self.add_item_to_list)
         btn_add_line.grid(row=1, column=5, padx=15)
 
-        # 3. List of Items (Treeview)
         list_frame = tk.Frame(self.modal, bg="white", padx=20)
         list_frame.pack(fill="both", expand=True)
         
@@ -166,7 +149,6 @@ class HistoryView:
         self.move_tree.heading("total", text="Total"); self.move_tree.column("total", width=80)
         self.move_tree.pack(fill="both", expand=True)
 
-        # 4. Footer (Submit)
         footer_frame = tk.Frame(self.modal, bg="#f9fafb", height=60)
         footer_frame.pack(fill="x", side="bottom")
         
@@ -210,18 +192,15 @@ class HistoryView:
         
         if not name or not qty: return
 
-        # Add to internal list
         self.transaction_items.append({
             "sku": sku,
             "quantity": int(qty)
         })
         
-        # Add to UI Tree
         total = self.lbl_line_total.get()
         price = self.lbl_prod_price.get()
         self.move_tree.insert("", "end", values=(sku, name, price, qty, total))
         
-        # Clear inputs
         self.entry_sku.delete(0, tk.END)
         self.set_entry(self.lbl_prod_name, "")
         self.set_entry(self.lbl_prod_price, "")
