@@ -93,4 +93,4 @@ def login(user_data: UserLogin, db: Session = Depends(get_db)):
     if not user.is_verified:
         raise HTTPException(status_code=400, detail="Account not verified. Please check your email.")
 
-    return {"message": "Login Successful", "user_id": user.id, "username": user.login_id}
+    return {"message": "Login Successful", "user_id": user.id, "username": user.login_id, "email": user.email}

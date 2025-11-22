@@ -5,7 +5,6 @@ def reset_table():
     print("Connecting to database...")
     with engine.connect() as connection:
         print("Dropping old user_details table...")
-        # We use COMMIT to ensure the changes happen immediately
         connection.execute(text("DROP TABLE IF EXISTS user_details CASCADE"))
         connection.commit()
         print("Table 'user_details' deleted successfully.")
