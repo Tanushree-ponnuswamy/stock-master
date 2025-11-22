@@ -1,18 +1,15 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
+import requests
 
 class ForgotPasswordScreen:
     def __init__(self, root):
         self.root = root
-        self.root.title("Forgot Password - Stock Master")
+        self.root.title("Reset Password - Stock Master")
+        self.API_URL = "http://127.0.0.1:8000"
         
-        # Colors
-        self.color_bg_right = "white"
-        self.color_primary = "#000000" 
-        self.color_text_head = "#111827"
-        self.color_text_sub = "#6B7280"
-        self.color_input_bg = "#F9FAFB"
-        self.color_border = "#E5E7EB"
+        self.email_storage = "" # To remember email across steps
+        self.otp_storage = ""   # To remember OTP across steps
         
         self.setup_window()
         self.setup_ui()
@@ -26,18 +23,17 @@ class ForgotPasswordScreen:
         self.root.resizable(False, False)
 
     def setup_ui(self):
-        # Clear existing content
+        # Clear main window
         for widget in self.root.winfo_children():
             widget.destroy()
 
         main_container = tk.Frame(self.root)
         main_container.pack(fill="both", expand=True)
-        
         main_container.grid_columnconfigure(0, weight=1, uniform="half_split")
         main_container.grid_columnconfigure(1, weight=1, uniform="half_split")
         main_container.grid_rowconfigure(0, weight=1)
 
-        # --- LEFT SIDE (Gradient) ---
+        # --- LEFT SIDE (Static) ---
         self.canvas_left = tk.Canvas(main_container, highlightthickness=0)
         self.canvas_left.grid(row=0, column=0, sticky="nsew")
         self.draw_gradient(self.canvas_left, "#ff9966", "#ff5e62")
@@ -47,37 +43,161 @@ class ForgotPasswordScreen:
         self.canvas_left.create_text(50, screen_h - 270, text="Security First", font=("Helvetica", 14), fill="#FFF1F2", anchor="w")
         self.canvas_left.create_text(50, screen_h - 180, text="Recover access to\nyour dashboard\nsecurely.", font=("Helvetica", 28, "bold"), fill="white", anchor="w", justify="left")
 
-        # --- RIGHT SIDE (Form) ---
-        frame_right = tk.Frame(main_container, bg=self.color_bg_right)
-        frame_right.grid(row=0, column=1, sticky="nsew")
+        # --- RIGHT SIDE (Dynamic) ---
+        self.frame_right = tk.Frame(main_container, bg="white")
+        self.frame_right.grid(row=0, column=1, sticky="nsew")
         
-        card = tk.Frame(frame_right, bg=self.color_bg_right)
+        # Start with Step 1: Email Input
+        self.show_step_1_email()
+
+    # --- STEP 1: EMAIL INPUT ---
+    def show_step_1_email(self):
+        self.clear_right_frame()
+        
+        card = tk.Frame(self.frame_right, bg="white")
         card.place(relx=0.5, rely=0.5, anchor="center")
 
-        tk.Label(card, text="*", font=("Courier", 50), fg=self.color_primary, bg=self.color_bg_right).pack(anchor="w")
-        tk.Label(card, text="Reset Password", font=("Helvetica", 26, "bold"), fg=self.color_text_head, bg=self.color_bg_right).pack(anchor="w")
-        tk.Label(card, text="Enter your email to receive reset instructions.", font=("Helvetica", 10), fg=self.color_text_sub, bg=self.color_bg_right).pack(anchor="w", pady=(5, 30))
+        tk.Label(card, text="*", font=("Courier", 50), fg="black", bg="white").pack(anchor="w")
+        tk.Label(card, text="Forgot Password", font=("Helvetica", 26, "bold"), fg="#111827", bg="white").pack(anchor="w")
+        tk.Label(card, text="Enter your registered email address.", font=("Helvetica", 10), fg="#6b7280", bg="white").pack(anchor="w", pady=(5, 30))
 
-        # Input
-        tk.Label(card, text="Email Address", font=("Helvetica", 10, "bold"), fg=self.color_text_head, bg=self.color_bg_right).pack(anchor="w", pady=(0, 5))
-        self.entry_email = tk.Entry(card, font=("Helvetica", 11), width=40, bg=self.color_input_bg, relief="flat", highlightthickness=1, highlightbackground=self.color_border, highlightcolor="#333")
+        tk.Label(card, text="Email Address", font=("Helvetica", 10, "bold"), fg="#111827", bg="white").pack(anchor="w", pady=(0, 5))
+        self.entry_email = tk.Entry(card, font=("Helvetica", 11), width=40, bg="#F9FAFB", relief="flat", highlightthickness=1, highlightbackground="#E5E7EB")
         self.entry_email.pack(ipady=8, pady=(0, 30))
 
-        # Submit Button
-        btn_send = tk.Button(card, text="Send Reset Link", font=("Helvetica", 11, "bold"), bg=self.color_primary, fg="white", activebackground="#333333", activeforeground="white", cursor="hand2", relief="flat", borderwidth=0)
-        btn_send.pack(fill="x", ipady=10)
+        btn_get_otp = tk.Button(card, text="Get OTP", font=("Helvetica", 11, "bold"), bg="black", fg="white", relief="flat", cursor="hand2",
+                                command=self.action_get_otp)
+        btn_get_otp.pack(fill="x", ipady=10)
         
-        # Footer
-        footer_frame = tk.Frame(card, bg=self.color_bg_right)
+        self.add_back_button(card)
+
+    # --- STEP 2: OTP INPUT ---
+    def show_step_2_otp(self):
+        self.clear_right_frame()
+        
+        card = tk.Frame(self.frame_right, bg="white")
+        card.place(relx=0.5, rely=0.5, anchor="center")
+
+        tk.Label(card, text="Verify OTP", font=("Helvetica", 26, "bold"), fg="#111827", bg="white").pack(anchor="w")
+        tk.Label(card, text=f"Enter the 6-digit code sent to\n{self.email_storage}", font=("Helvetica", 10), fg="#6b7280", bg="white", justify="left").pack(anchor="w", pady=(5, 30))
+
+        self.entry_otp = tk.Entry(card, font=("Helvetica", 14, "bold"), width=20, bg="#F9FAFB", relief="flat", highlightthickness=1, highlightbackground="#E5E7EB", justify="center")
+        self.entry_otp.pack(ipady=10, pady=(0, 30))
+
+        btn_verify = tk.Button(card, text="Verify Code", font=("Helvetica", 11, "bold"), bg="black", fg="white", relief="flat", cursor="hand2",
+                               command=self.action_verify_otp)
+        btn_verify.pack(fill="x", ipady=10)
+        
+        btn_resend = tk.Button(card, text="Resend Code", font=("Helvetica", 9), bg="white", fg="#2563eb", relief="flat", cursor="hand2", command=self.action_get_otp)
+        btn_resend.pack(pady=10)
+
+    # --- STEP 3: NEW PASSWORD ---
+    def show_step_3_reset(self):
+        self.clear_right_frame()
+        
+        card = tk.Frame(self.frame_right, bg="white")
+        card.place(relx=0.5, rely=0.5, anchor="center")
+
+        tk.Label(card, text="Set New Password", font=("Helvetica", 26, "bold"), fg="#111827", bg="white").pack(anchor="w")
+        tk.Label(card, text="Create a strong password.", font=("Helvetica", 10), fg="#6b7280", bg="white").pack(anchor="w", pady=(5, 30))
+
+        tk.Label(card, text="New Password", font=("Helvetica", 10, "bold"), bg="white").pack(anchor="w", pady=(0, 5))
+        self.entry_new = tk.Entry(card, font=("Helvetica", 11), width=40, bg="#F9FAFB", relief="flat", show="*", highlightthickness=1)
+        self.entry_new.pack(ipady=8, pady=(0, 15))
+
+        tk.Label(card, text="Re-enter Password", font=("Helvetica", 10, "bold"), bg="white").pack(anchor="w", pady=(0, 5))
+        self.entry_conf = tk.Entry(card, font=("Helvetica", 11), width=40, bg="#F9FAFB", relief="flat", show="*", highlightthickness=1)
+        self.entry_conf.pack(ipady=8, pady=(0, 30))
+
+        btn_reset = tk.Button(card, text="Reset Password", font=("Helvetica", 11, "bold"), bg="black", fg="white", relief="flat", cursor="hand2",
+                              command=self.action_final_reset)
+        btn_reset.pack(fill="x", ipady=10)
+
+    # --- ACTIONS ---
+    def action_get_otp(self):
+        email = self.email_storage if self.email_storage else self.entry_email.get().strip()
+        if not email:
+            messagebox.showwarning("Input", "Please enter your email.")
+            return
+        
+        try:
+            res = requests.post(f"{self.API_URL}/forgot-password/request-otp", json={"email": email})
+            if res.status_code == 200:
+                self.email_storage = email
+                messagebox.showinfo("Sent", "OTP sent to your email.")
+                self.show_step_2_otp()
+            else:
+                messagebox.showerror("Error", "Email not found.")
+        except:
+            messagebox.showerror("Error", "Connection Failed")
+
+    def action_verify_otp(self):
+        otp = self.entry_otp.get().strip()
+        if len(otp) != 6:
+            messagebox.showerror("Error", "Invalid OTP format")
+            return
+
+        try:
+            # Check OTP with server
+            payload = {"email": self.email_storage, "otp": otp}
+            res = requests.post(f"{self.API_URL}/forgot-password/verify-otp", json=payload)
+            
+            if res.status_code == 200:
+                self.otp_storage = otp
+                self.show_step_3_reset()
+            else:
+                messagebox.showerror("Error", "Invalid OTP.")
+        except:
+            messagebox.showerror("Error", "Connection Failed")
+
+    def action_final_reset(self):
+        new = self.entry_new.get().strip()
+        conf = self.entry_conf.get().strip()
+        
+        if new != conf:
+            messagebox.showerror("Error", "Passwords do not match")
+            return
+        if len(new) < 4:
+            messagebox.showerror("Error", "Password too short")
+            return
+
+        try:
+            payload = {
+                "email": self.email_storage,
+                "otp": self.otp_storage,
+                "new_password": new
+            }
+            res = requests.post(f"{self.API_URL}/forgot-password/reset", json=payload)
+            
+            if res.status_code == 200:
+                self.show_success_screen()
+            else:
+                messagebox.showerror("Error", "Reset Failed. OTP might be expired.")
+        except:
+            messagebox.showerror("Error", "Connection Failed")
+
+    def show_success_screen(self):
+        self.clear_right_frame()
+        card = tk.Frame(self.frame_right, bg="white")
+        card.place(relx=0.5, rely=0.5, anchor="center")
+        
+        tk.Label(card, text="✔", font=("Arial", 60), fg="#10B981", bg="white").pack(pady=10)
+        tk.Label(card, text="Password Reset Successful!", font=("Helvetica", 18, "bold"), bg="white", fg="#111827").pack()
+        tk.Label(card, text="Redirecting to login...", font=("Helvetica", 10), bg="white", fg="#6b7280").pack(pady=10)
+        
+        self.root.after(3000, self.open_login) # 3 seconds is usually enough
+
+    # --- HELPERS ---
+    def clear_right_frame(self):
+        for widget in self.frame_right.winfo_children():
+            widget.destroy()
+
+    def add_back_button(self, parent):
+        footer_frame = tk.Frame(parent, bg="white")
         footer_frame.pack(pady=20)
-        
-        tk.Label(footer_frame, text="Remembered your password?", font=("Helvetica", 10), fg=self.color_text_sub, bg=self.color_bg_right).pack(side="left")
-        
-        # Back to Login
-        btn_back = tk.Button(footer_frame, text="Login", font=("Helvetica", 10, "bold"), fg=self.color_primary, bg=self.color_bg_right, cursor="hand2", relief="flat", borderwidth=0, activebackground="white", command=self.open_login)
-        btn_back.pack(side="left", padx=5)
-        
-        self.canvas_left.bind("<Configure>", lambda e: self.draw_gradient(self.canvas_left, "#ff9966", "#ff5e62"))
+        btn_back = tk.Button(footer_frame, text="Back to Login", font=("Helvetica", 10, "bold"), fg="black", bg="white", 
+                             cursor="hand2", relief="flat", borderwidth=0, command=self.open_login)
+        btn_back.pack()
 
     def open_login(self):
         from windows.login import LoginScreen

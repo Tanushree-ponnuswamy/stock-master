@@ -50,3 +50,40 @@ def send_verification_email(to_email: str, token: str):
         print("Verification email sent successfully.")
     except Exception as e:
         print(f"Failed to send email: {e}")
+
+# ... existing imports and config ...
+
+# --- NEW FUNCTION ---
+def send_otp_email(to_email: str, otp_code: str):
+    subject = "Password Reset OTP - Stock Master"
+    
+    body = f"""
+    <html>
+      <body style="font-family: Arial, sans-serif; color: #333;">
+        <div style="max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #eee;">
+            <h2>Password Reset Request</h2>
+            <p>Use the code below to verify your identity and reset your password.</p>
+            <div style="background: #f3f4f6; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px;">
+                {otp_code}
+            </div>
+            <p>If you did not request this, please ignore this email.</p>
+        </div>
+      </body>
+    </html>
+    """
+
+    msg = MIMEMultipart("alternative")
+    msg["From"] = SMTP_USERNAME
+    msg["To"] = to_email
+    msg["Subject"] = subject
+    msg.attach(MIMEText(body, "html"))
+
+    try:
+        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        server.starttls()
+        server.login(SMTP_USERNAME, SMTP_PASSWORD)
+        server.sendmail(SMTP_USERNAME, to_email, msg.as_string())
+        server.quit()
+        print("OTP sent successfully")
+    except Exception as e:
+        print(f"Failed to send OTP: {e}")

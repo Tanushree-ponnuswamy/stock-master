@@ -10,8 +10,10 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     
-    # --- NEW COLUMNS ---
     is_verified = Column(Boolean, default=False)
     verification_token = Column(String, nullable=True)
+    
+    # --- NEW COLUMN FOR FORGOT PASSWORD ---
+    otp = Column(String, nullable=True)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
